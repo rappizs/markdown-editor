@@ -1,16 +1,8 @@
+//base imports
 import './App.css';
 import { Component } from 'react';
-import remarkToc from 'remark-toc';
-import remarkGfm from 'remark-gfm'
-import remarkSlug from 'remark-slug'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import 'katex/dist/katex.min.css'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 
-import ReactMarkdown from 'react-markdown';
-import Editor from './Editor';
-
+//css imports
 import 'codemirror/theme/cobalt.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/theme/elegant.css';
@@ -19,6 +11,20 @@ import 'codemirror/theme/ssms.css';
 import 'codemirror/theme/xq-light.css';
 import 'codemirror/theme/ttcn.css';
 import 'codemirror/theme/rubyblue.css';
+
+//plugin imports
+import remarkToc from 'remark-toc';
+import remarkGfm from 'remark-gfm'
+import remarkSlug from 'remark-slug'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+
+//other imports
+import ReactMarkdown from 'react-markdown';
+import Editor from './components/Editor';
+import ThemeSelect from './components/ThemeSelect';
 
 class App extends Component {
 
@@ -130,18 +136,8 @@ $$f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi$$
 
 		return <>
 			<div className="header">
-				<button onClick={() => this.save()}>Save</button>
-				<label htmlFor="theme">Theme: </label>
-				<select name="theme" id="theme" value={theme} onChange={e => this.changeTheme(e.target.value)}>
-					<option value="cobalt">cobalt</option>
-					<option value="monokai">monokai</option>
-					<option value="elegant" >elegant</option>
-					<option value="the-matrix" >matrix</option>
-					<option value="ssms" >ssms</option>
-					<option value="xq-light" >xq-light</option>
-					<option value="ttcn" >ttcn</option>
-					<option value="rubyblue" >rubyblue</option>
-				</select>
+				<button onClick={() => this.save()} className="btn btn-primary">Save</button>
+				<ThemeSelect value={theme} changeTheme={theme => this.changeTheme(theme)} />
 			</div>
 			<div className="editor">
 				<Editor theme={theme} value={value} onChange={newValue => this.handleChange(newValue)} />
