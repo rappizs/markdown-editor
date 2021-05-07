@@ -104,6 +104,11 @@ $$f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi$$
 		theme: "monokai"
 	}
 
+	componentDidMount() {
+		const theme = window.localStorage.getItem("theme");
+		this.setState({ theme })
+	}
+
 	handleChange(newValue) {
 		this.setState({ value: newValue });
 	}
@@ -116,6 +121,7 @@ $$f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi$$
 	}
 
 	changeTheme(theme) {
+		window.localStorage.setItem("theme", theme);
 		this.setState({ theme })
 	}
 
