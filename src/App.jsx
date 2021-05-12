@@ -25,6 +25,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import ReactMarkdown from 'react-markdown';
 import Editor from './components/Editor';
 import ThemeSelect from './components/ThemeSelect';
+import defaults from './defaults';
 
 class App extends Component {
 
@@ -107,12 +108,13 @@ $$f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi$$
 				)
 			}
 		},
-		theme: "monokai"
+		theme: defaults.theme,
 	}
 
 	componentDidMount() {
 		const theme = window.localStorage.getItem("theme");
-		this.setState({ theme })
+		if (theme)
+			this.setState({ theme })
 	}
 
 	handleChange(newValue) {
