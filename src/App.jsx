@@ -14,12 +14,13 @@ import 'codemirror/theme/rubyblue.css';
 
 //plugin imports
 import remarkToc from 'remark-toc';
-import remarkGfm from 'remark-gfm'
-import remarkSlug from 'remark-slug'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
+import remarkGfm from 'remark-gfm';
+import remarkSlug from 'remark-slug';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 
 //other imports
 import ReactMarkdown from 'react-markdown';
@@ -94,10 +95,21 @@ class Repository
 ## Math with TeX
 
 $$f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi$$
+
+## HTML in Markdown
+
+<p>
+	<span class="tg_task tg_taskctrl tg_neutral" id="task1">
+		<span class="tg_cnt">#2</span>
+		<span>✓</span>
+		<span>?</span>
+	</span> 
+	Hello World, I'm in a HTML paragraph!
+</p>
 `,
 
 		remarkPlugins: [remarkToc, remarkGfm, remarkMath, remarkSlug],
-		rehypePlugins: [rehypeKatex],
+		rehypePlugins: [rehypeKatex, rehypeRaw],
 		components: {
 			code({ node, inline, className, children, ...props }) {
 				const match = /language-(\w+)/.exec(className || '')
@@ -141,7 +153,7 @@ $$f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi$$
 				<button onClick={() => this.save()} className="btn btn-primary">Save</button>
 				<ThemeSelect value={theme} changeTheme={theme => this.changeTheme(theme)} />
 			</div>
-			<div className="editor">
+			<div className="editor" contentEditable="true" spellCheck="true">
 				<Editor theme={theme} value={value} onChange={newValue => this.handleChange(newValue)} />
 			</div>
 			<div id="result" className="result">
