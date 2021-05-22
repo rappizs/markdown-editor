@@ -1,6 +1,7 @@
 //base imports
 import './App.css';
 import { Component } from 'react';
+import React from 'react';
 
 //css imports
 import 'codemirror/theme/cobalt.css';

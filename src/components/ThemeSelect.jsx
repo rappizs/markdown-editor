@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function ThemeSelect(props) {
 	const { value, changeTheme } = props;
 	return <>

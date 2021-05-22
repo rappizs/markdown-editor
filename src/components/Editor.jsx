@@ -1,6 +1,10 @@
-import Codemirror from "@uiw/react-codemirror";
+import React from 'react';
 import { Component } from "react";
-import 'codemirror/keymap/sublime';
+
+let CodeMirror = null;
+if (typeof window !== 'undefined' && typeof window.navigator !== 'undefined') {
+	CodeMirror = require('@uiw/react-codemirror');
+}
 
 class Editor extends Component {
 
@@ -14,15 +18,14 @@ class Editor extends Component {
 	render() {
 		const { value, theme } = this.props;
 
-		return <Codemirror
+		return <> { CodeMirror && <CodeMirror
 			value={value}
 			onChange={(editor, change) => this.handleChange(editor, change)}
 			options={{
 				theme: theme,
-				keyMap: "sublime",
 				mode: "markdown",
 			}}
-		/>
+		/>}</>
 	}
 }
 
