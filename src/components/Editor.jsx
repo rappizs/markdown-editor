@@ -1,32 +1,22 @@
-import React from 'react';
-import { Component } from "react";
+import Codemirror from "@uiw/react-codemirror";
+import 'codemirror/keymap/sublime';
+import { useEffect } from "react";
 
-let CodeMirror = null;
-if (typeof window !== 'undefined' && typeof window.navigator !== 'undefined') {
-	CodeMirror = require('@uiw/react-codemirror');
-}
+export default function Editor({ value, theme, onChange }) {
 
-class Editor extends Component {
-
-	handleChange(editor, change) {
-		const { value, onChange } = this.props
+	const handleChange = (editor) => {
 		const newValue = editor.getValue();
-		if (newValue !== value)
-			onChange(newValue);
+		onChange(newValue);
 	}
 
-	render() {
-		const { value, theme } = this.props;
+	return <Codemirror
+		value={value}
+		onChange={editor => handleChange(editor)}
+		options={{
+			theme: theme,
+			keyMap: "sublime",
+			mode: "markdown",
+		}}
+	/>
 
-		return <> { CodeMirror && <CodeMirror
-			value={value}
-			onChange={(editor, change) => this.handleChange(editor, change)}
-			options={{
-				theme: theme,
-				mode: "markdown",
-			}}
-		/>}</>
-	}
 }
-
-export default Editor;

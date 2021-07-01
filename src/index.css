@@ -57,6 +57,7 @@
   }
   
   .editor {
+	border-right: 3px solid black;
 	left: 0;
 	width: 50%;
   }

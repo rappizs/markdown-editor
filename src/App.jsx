@@ -1,6 +1,6 @@
 //base imports
 import './App.css';
-import { Component } from 'react';
+import { Component, useCallback, useEffect, useRef, useState } from 'react';
 import React from 'react';
 
 //css imports
@@ -13,26 +13,23 @@ import 'codemirror/theme/xq-light.css';
 import 'codemirror/theme/ttcn.css';
 import 'codemirror/theme/rubyblue.css';
 
-//plugin imports
-import remarkToc from 'remark-toc';
-import remarkGfm from 'remark-gfm';
-import remarkSlug from 'remark-slug';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
-import 'katex/dist/katex.min.css'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-
 //other imports
-import ReactMarkdown from 'react-markdown';
 import Editor from './components/Editor';
 import ThemeSelect from './components/ThemeSelect';
 import defaults from './defaults';
 
-class App extends Component {
+export default function App() {
 
-	state = {
-		value: `# Markdown demo
+	const [editorValue, setEditorValue] = useState("");
+	const [theme, setTheme] = useState(defaults.theme);
+	const [pendingFetchController, setPendingFetchController] = useState(null);
+	const pendingFetchControllerRef = useRef();
+	pendingFetchControllerRef.current = pendingFetchController;
+
+	useEffect(() => {
+		const themeFromStorage = window.localStorage.getItem("theme");
+		const initValue =
+			`# Markdown demo
 
 ## Table of contents
 
@@ -59,15 +56,15 @@ class Editor extends Component {
 \`\`\`scala
 override def create(
 	in: proto.CreateRequest): Future[proto.Response] = {
-  val aggregateRootId = UUID.randomUUID()
-  val entityRef =
+	val aggregateRootId = UUID.randomUUID()
+	val entityRef =
 	sharding.entityRefFor(e.EntityKey, aggregateRootId.toString)
-  val reply: Future[e.Summary] =
+	val reply: Future[e.Summary] =
 	entityRef.askWithStatus(
-	  e.Create(in.name, in.value, in.quantity, _))
-  val response =
+		e.Create(in.name, in.value, in.quantity, _))
+	val response =
 	reply.map(entity => proto.Response(Some(toProto(entity))))
-  convertError(response)
+	convertError(response)
 }
 \`\`\`
 
@@ -82,15 +79,15 @@ require __DIR__ . "/../models/station.php";
 
 class Repository
 {
-    private  $pgDBconn;
-    private  $mysqlDBconn;
+	private  $pgDBconn;
+	private  $mysqlDBconn;
 
-    public function __construct($pgDBconn, $mysqlDBconn = null)
-    {
-        $this->pgDBconn = $pgDBconn;
-        $this->mysqlDBconn = $mysqlDBconn;
-        mysqli_set_charset($mysqlDBconn, "utf8mb4");
-    }
+	public function __construct($pgDBconn, $mysqlDBconn = null)
+	{
+		$this->pgDBconn = $pgDBconn;
+		$this->mysqlDBconn = $mysqlDBconn;
+		mysqli_set_charset($mysqlDBconn, "utf8mb4");
+	}
 \`\`\`
 
 ## Math with TeX
@@ -106,68 +103,58 @@ $$f(x) = \\int_{-\\infty}^\\infty \\hat f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi$$
 		<span>?</span>
 	</span> 
 	Hello World, I'm in a HTML paragraph!
-</p>
-`,
+</p>`;
 
-		remarkPlugins: [remarkToc, remarkGfm, remarkMath, remarkSlug],
-		rehypePlugins: [rehypeKatex, rehypeRaw],
-		components: {
-			code({ node, inline, className, children, ...props }) {
-				const match = /language-(\w+)/.exec(className || '')
-				return !inline && match ? (
-					<SyntaxHighlighter language={match[1]} PreTag="div" children={String(children).replace(/\n$/, '')} {...props} />
-				) : (
-					<code className={className} {...props} />
-				)
-			}
-		},
-		theme: defaults.theme,
+		if (themeFromStorage)
+			setTheme(themeFromStorage);
+
+		setEditorValue(initValue);
+	}, [])
+
+	const handleChange = (newValue) => {
+		const controller = new AbortController();
+		const signal = controller.signal;
+
+		if (pendingFetchControllerRef.current)
+			pendingFetchControllerRef.current.abort();
+
+		if (newValue) {
+			setPendingFetchController(controller);
+			fetch("http://127.0.0.1:3006", {
+				signal,
+				method: "POST",
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ value: newValue })
+			}).then(res => res.text())
+				.then(data => document.getElementById("result").innerHTML = data)
+				.catch(err => err);
+			setEditorValue(newValue);
+		}
+		else
+			document.getElementById("result").innerHTML = null
 	}
 
-	componentDidMount() {
-		const theme = window.localStorage.getItem("theme");
-		if (theme)
-			this.setState({ theme })
-	}
-
-	handleChange(newValue) {
-		this.setState({ value: newValue });
-	}
-
-	save() {
+	const save = () => {
 		const html = document.getElementById('result').innerHTML;
-		const { value } = this.state;
-
-		console.log(html, value);
+		console.log(html, editorValue);
 	}
 
-	changeTheme(theme) {
-		window.localStorage.setItem("theme", theme);
-		this.setState({ theme })
+	const changeTheme = (newTheme) => {
+		window.localStorage.setItem("theme", newTheme);
+		setTheme(newTheme);
 	}
 
-	render() {
-		const { value, components, remarkPlugins, rehypePlugins, theme } = this.state;
-
-		return <>
-			<div className="header">
-				<button onClick={() => this.save()} className="btn btn-primary">Save</button>
-				<ThemeSelect value={theme} changeTheme={theme => this.changeTheme(theme)} />
-			</div>
-			<div className="editor" contentEditable="true" spellCheck="true">
-				<Editor theme={theme} value={value} onChange={newValue => this.handleChange(newValue)} />
-			</div>
-			<div id="result" className="result">
-				<ReactMarkdown
-					className="markdown-body"
-					components={components}
-					remarkPlugins={remarkPlugins}
-					rehypePlugins={rehypePlugins}
-					children={value}
-				/>
-			</div>
-		</>
-	}
+	return <>
+		<div className="header">
+			<button onClick={() => save()} className="btn btn-primary">Save</button>
+			<ThemeSelect value={theme} changeTheme={newTheme => changeTheme(newTheme)} />
+		</div>
+		<div className="editor" contentEditable="true" spellCheck="true">
+			<Editor theme={theme} value={editorValue} onChange={newValue => handleChange(newValue)} />
+		</div>
+		<div id="result" className="result">
+		</div>
+	</>
 }
-
-export default App;
